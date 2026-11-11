@@ -1,0 +1,815 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5865f2">
+  <title>Discórdia Call</title>  <style>
+    *{box-sizing:border-box}
+    :root{
+      --rail:#1e1f22;
+      --side:#2b2d31;
+      --main:#313338;
+      --input:#383a40;
+      --hover:#3f4147;
+      --text:#f2f3f5;
+      --muted:#949ba4;
+      --accent:#5865f2;
+      --danger:#ed4245;
+      --online:#23a559;
+    }
+
+    [data-theme="light"]{
+      --rail:#e3e5e8;
+      --side:#f2f3f5;
+      --main:#ffffff;
+      --input:#ebedef;
+      --hover:#d7d9dc;
+      --text:#313338;
+      --muted:#5c6370;
+    }
+
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--main);
+      color:var(--text);
+    }
+
+    button,input{font:inherit}
+    button{cursor:pointer}
+
+    #app{
+      height:100%;
+      display:grid;
+      grid-template-columns:72px 240px 1fr 220px;
+      overflow:hidden;
+    }
+
+    /* SERVIDORES */
+    .servers{
+      background:var(--rail);
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      overflow-y:auto;
+    }
+
+    .server{
+      width:48px;
+      height:48px;
+      border:0;
+      border-radius:50%;
+      background:var(--main);
+      color:var(--text);
+      font-weight:bold;
+      font-size:16px;
+      transition:.18s;
+    }
+
+    .server:hover,
+    .server.active{
+      border-radius:16px;
+      background:var(--accent);
+      color:white;
+    }
+
+    .add{
+      color:#23a559;
+      font-size:25px;
+    }
+
+    /* CANAIS */
+    .channels{
+      background:var(--side);
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      overflow:hidden;
+    }
+
+    .server-title{
+      height:52px;
+      display:flex;
+      align-items:center;
+      padding:0 16px;
+      font-weight:bold;
+      border-bottom:1px solid #0003;
+    }
+
+    .channel-list{
+      flex:1;
+      overflow-y:auto;
+      padding:10px 8px;
+    }
+
+    .category{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:bold;
+      margin:16px 8px 6px;
+    }
+
+    .channel{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:var(--muted);
+      text-align:left;
+      padding:9px 10px;
+      border-radius:5px;
+      margin:2px 0;
+    }
+
+    .channel:hover,
+    .channel.active{
+      background:var(--hover);
+      color:var(--text);
+    }
+
+    .user-panel{
+      background:#232428;
+      padding:8px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      background:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:bold;
+      flex:none;
+    }
+
+    .user-info{
+      min-width:0;
+      flex:1;
+    }
+
+    .user-info b{
+      display:block;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-size:13px;
+    }
+
+    .user-info small{
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .icon-btn{
+      border:0;
+      background:transparent;
+      color:var(--muted);
+      font-size:18px;
+      padding:6px;
+      border-radius:5px;
+    }
+
+    .icon-btn:hover{
+      background:var(--hover);
+      color:var(--text);
+    }
+
+    /* CHAT */
+    .chat{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      min-height:0;
+      background:var(--main);
+    }
+
+    .chat-header{
+      height:52px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 16px;
+      border-bottom:1px solid #0003;
+      flex:none;
+    }
+
+    .menu{
+      display:none;
+    }
+
+    .channel-name{
+      font-weight:bold;
+      flex:1;
+    }
+
+    .messages{
+      flex:1;
+      overflow-y:auto;
+      padding:16px 0;
+    }
+
+    .welcome{
+      padding:24px 20px;
+      border-bottom:1px solid #0002;
+      margin-bottom:10px;
+    }
+
+    .welcome h1{
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .welcome p{
+      color:var(--muted);
+      margin:0;
+    }
+
+    .message{
+      display:flex;
+      gap:12px;
+      padding:8px 18px;
+    }
+
+    .message:hover{
+      background:#0000000a;
+    }
+
+    .message-content{
+      min-width:0;
+      flex:1;
+    }
+
+    .message-header{
+      display:flex;
+      align-items:baseline;
+      gap:7px;
+    }
+
+    .message-header b{
+      font-size:14px;
+    }
+
+    .message-header small{
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .message-text{
+      margin-top:3px;
+      line-height:1.45;
+      word-break:break-word;
+    }
+
+    .message-form{
+      display:flex;
+      gap:8px;
+      padding:0 16px 16px;
+      flex:none;
+    }
+
+    .message-input{
+      flex:1;
+      min-width:0;
+      border:0;
+      border-radius:8px;
+      background:var(--input);
+      color:var(--text);
+      padding:13px 14px;
+      outline:none;
+    }
+
+    .send{
+      width:48px;
+      border:0;
+      border-radius:8px;
+      background:var(--accent);
+      color:white;
+      font-size:18px;
+    }
+
+    /* MEMBROS */
+    .members{
+      background:var(--side);
+      padding:16px 8px;
+      overflow-y:auto;
+    }
+
+    .member-title{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:bold;
+      margin:6px 8px 10px;
+    }
+
+    .member{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:7px 8px;
+      border-radius:5px;
+    }
+
+    .member:hover{
+      background:var(--hover);
+    }
+
+    .status{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--online);
+      margin-left:-16px;
+      margin-top:22px;
+      border:2px solid var(--side);
+    }
+
+    .member b{
+      font-size:13px;
+    }
+
+    /* MODAL */
+    .modal{
+      position:fixed;
+      inset:0;
+      background:#0009;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:20;
+      padding:16px;
+    }
+
+    .modal.show{display:flex}
+
+    .modal-box{
+      width:min(420px,100%);
+      background:var(--main);
+      border-radius:10px;
+      padding:22px;
+      box-shadow:0 10px 40px #0008;
+    }
+
+    .modal-box h2{
+      margin:0 0 10px;
+    }
+
+    .modal-box p{
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .modal-box input{
+      width:100%;
+      border:0;
+      background:var(--input);
+      color:var(--text);
+      border-radius:6px;
+      padding:12px;
+      outline:none;
+      margin:8px 0;
+    }
+
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:14px;
+    }
+
+    .btn{
+      border:0;
+      padding:10px 14px;
+      border-radius:6px;
+      background:var(--accent);
+      color:white;
+    }
+
+    .btn.gray{
+      background:var(--hover);
+    }
+
+    /* MOBILE */
+    @media(max-width:850px){
+      #app{
+        grid-template-columns:64px 220px 1fr;
+      }
+
+      .members{
+        display:none;
+      }
+    }
+
+    @media(max-width:650px){
+      #app{
+        grid-template-columns:1fr;
+      }
+
+      .servers,
+      .channels{
+        position:fixed;
+        top:0;
+        bottom:0;
+        z-index:10;
+        transition:transform .2s ease;
+      }
+
+      .servers{
+        left:0;
+        width:64px;
+        transform:translateX(-110%);
+      }
+
+      .channels{
+        left:64px;
+        width:230px;
+        transform:translateX(-130%);
+      }
+
+      body.menu-open .servers,
+      body.menu-open .channels{
+        transform:translateX(0);
+      }
+
+      .menu{
+        display:block;
+      }
+
+      .chat-header{
+        height:50px;
+      }
+    }
+  </style></head><body><div id="app">  <!-- SERVIDORES -->  <aside class="servers">
+    <button class="server active" onclick="selectServer(this)">DC</button>
+    <button class="server" onclick="selectServer(this)">RP</button>
+    <button class="server" onclick="selectServer(this)">🎮</button>
+    <button class="server add" onclick="openModal()">+</button>
+  </aside>  <!-- CANAIS -->  <aside class="channels"><div class="server-title">Discórdia Call</div>
+
+<div class="channel-list">
+  <div class="category">CANAIS DE TEXTO</div>
+
+  <button class="channel active" onclick="selectChannel(this,'geral')">
+    # geral
+  </button>
+
+  <button class="channel" onclick="selectChannel(this,'bate-papo')">
+    # bate-papo
+  </button>
+
+  <button class="channel" onclick="selectChannel(this,'anúncios')">
+    # anúncios
+  </button>
+
+  <div class="category">CANAIS DE VOZ</div>
+
+  <button class="channel">
+    🔊 Geral
+  </button>
+
+  <button class="channel">
+    🔊 Jogos
+  </button>
+</div>
+
+<div class="user-panel">
+  <div class="avatar" id="myAvatar">S</div>
+
+  <div class="user-info">
+    <b id="myName">Samuel</b>
+    <small>Online</small>
+  </div>
+
+  <button class="icon-btn" onclick="toggleTheme()">☀</button>
+  <button class="icon-btn" onclick="openProfile()">⚙</button>
+</div>
+
+  </aside>  <!-- CHAT -->  <main class="chat"><header class="chat-header">
+  <button class="icon-btn menu" onclick="toggleMenu()">☰</button>
+  <span style="color:var(--muted)">#</span>
+  <div class="channel-name" id="channelTitle">geral</div>
+  <button class="icon-btn" onclick="clearMessages()">🗑</button>
+</header>
+
+<div class="messages" id="messages"></div>
+
+<form class="message-form" id="messageForm">
+  <input
+    class="message-input"
+    id="messageInput"
+    type="text"
+    placeholder="Conversar em #geral"
+    autocomplete="off"
+  >
+  <button class="send" type="submit">➤</button>
+</form>
+
+  </main>  <!-- MEMBROS -->  <aside class="members"><div class="member-title">ONLINE — 3</div>
+
+<div class="member">
+  <div class="avatar">S</div>
+  <div class="status"></div>
+  <b>Samuel</b>
+</div>
+
+<div class="member">
+  <div class="avatar" style="background:#23a559">D</div>
+  <div class="status"></div>
+  <b>Discórdia Bot</b>
+</div>
+
+<div class="member">
+  <div class="avatar" style="background:#eb459e">A</div>
+  <div class="status"></div>
+  <b>Amigo</b>
+</div>
+
+  </aside></div><!-- MODAL SERVIDOR --><div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Criar servidor</h2>
+    <p>Escolha um nome para o seu novo servidor.</p><input
+  id="serverName"
+  type="text"
+  placeholder="Nome do servidor"
+>
+
+<div class="modal-actions">
+  <button class="btn gray" onclick="closeModal()">Cancelar</button>
+  <button class="btn" onclick="createServer()">Criar</button>
+</div>
+
+  </div>
+</div><!-- MODAL PERFIL --><div class="modal" id="profileModal">
+  <div class="modal-box">
+    <h2>Meu perfil</h2><p>Nome de exibição</p>
+
+<input
+  id="profileName"
+  type="text"
+  placeholder="Seu nome"
+>
+
+<div class="modal-actions">
+  <button class="btn gray" onclick="closeProfile()">Cancelar</button>
+  <button class="btn" onclick="saveProfile()">Salvar</button>
+</div>
+
+  </div>
+</div><script>
+  let currentChannel = "geral";
+
+  const messages = document.getElementById("messages");
+  const form = document.getElementById("messageForm");
+  const input = document.getElementById("messageInput");
+
+  const defaultMessages = {
+    "geral": [
+      {
+        user: "Discórdia Bot",
+        text: "👋 Bem-vindo ao canal geral!"
+      },
+      {
+        user: "Samuel",
+        text: "Meu site está funcionando no GitHub Pages 🚀"
+      }
+    ],
+
+    "bate-papo": [
+      {
+        user: "Discórdia Bot",
+        text: "💬 Pode conversar aqui!"
+      }
+    ],
+
+    "anúncios": [
+      {
+        user: "Discórdia Bot",
+        text: "📢 Aqui aparecem os anúncios do servidor."
+      }
+    ]
+  };
+
+  let database = JSON.parse(
+    localStorage.getItem("discordia_messages")
+  ) || defaultMessages;
+
+  function escapeHTML(text){
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function getTime(){
+    return new Date().toLocaleTimeString("pt-BR",{
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+  }
+
+  function renderMessages(){
+    messages.innerHTML = "";
+
+    const welcome = document.createElement("div");
+    welcome.className = "welcome";
+    welcome.innerHTML = `
+      <h1>Bem-vindo ao #${escapeHTML(currentChannel)}!</h1>
+      <p>Este é o começo deste canal.</p>
+    `;
+
+    messages.appendChild(welcome);
+
+    const list = database[currentChannel] || [];
+
+    list.forEach(msg => {
+      const item = document.createElement("div");
+      item.className = "message";
+
+      const letter = msg.user.charAt(0).toUpperCase();
+
+      item.innerHTML = `
+        <div class="avatar">${escapeHTML(letter)}</div>
+
+        <div class="message-content">
+          <div class="message-header">
+            <b>${escapeHTML(msg.user)}</b>
+            <small>${msg.time || ""}</small>
+          </div>
+
+          <div class="message-text">
+            ${escapeHTML(msg.text)}
+          </div>
+        </div>
+      `;
+
+      messages.appendChild(item);
+    });
+
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function selectChannel(button,name){
+    document.querySelectorAll(".channel").forEach(c=>{
+      c.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    currentChannel = name;
+
+    document.getElementById("channelTitle").textContent = name;
+    input.placeholder = "Conversar em #" + name;
+
+    renderMessages();
+
+    document.body.classList.remove("menu-open");
+  }
+
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+
+    const text = input.value.trim();
+
+    if(!text) return;
+
+    const name = localStorage.getItem("discordia_name") || "Samuel";
+
+    if(!database[currentChannel]){
+      database[currentChannel] = [];
+    }
+
+    database[currentChannel].push({
+      user:name,
+      text:text,
+      time:getTime()
+    });
+
+    localStorage.setItem(
+      "discordia_messages",
+      JSON.stringify(database)
+    );
+
+    input.value = "";
+
+    renderMessages();
+  });
+
+  function clearMessages(){
+    if(confirm("Apagar as mensagens deste canal?")){
+      database[currentChannel] = [];
+
+      localStorage.setItem(
+        "discordia_messages",
+        JSON.stringify(database)
+      );
+
+      renderMessages();
+    }
+  }
+
+  function toggleTheme(){
+    const root = document.documentElement;
+
+    if(root.getAttribute("data-theme") === "light"){
+      root.removeAttribute("data-theme");
+      localStorage.setItem("discordia_theme","dark");
+    }else{
+      root.setAttribute("data-theme","light");
+      localStorage.setItem("discordia_theme","light");
+    }
+  }
+
+  function toggleMenu(){
+    document.body.classList.toggle("menu-open");
+  }
+
+  function selectServer(button){
+    document.querySelectorAll(".server").forEach(s=>{
+      if(!s.classList.contains("add")){
+        s.classList.remove("active");
+      }
+    });
+
+    button.classList.add("active");
+
+    document.body.classList.remove("menu-open");
+  }
+
+  function openModal(){
+    document.getElementById("modal").classList.add("show");
+  }
+
+  function closeModal(){
+    document.getElementById("modal").classList.remove("show");
+  }
+
+  function createServer(){
+    const name = document.getElementById("serverName").value.trim();
+
+    if(!name){
+      alert("Digite um nome para o servidor.");
+      return;
+    }
+
+    alert("Servidor '" + name + "' criado localmente!");
+
+    document.getElementById("serverName").value = "";
+    closeModal();
+  }
+
+  function openProfile(){
+    const name = localStorage.getItem("discordia_name") || "Samuel";
+
+    document.getElementById("profileName").value = name;
+
+    document.getElementById("profileModal").classList.add("show");
+  }
+
+  function closeProfile(){
+    document.getElementById("profileModal").classList.remove("show");
+  }
+
+  function saveProfile(){
+    const name = document.getElementById("profileName").value.trim();
+
+    if(!name) return;
+
+    localStorage.setItem("discordia_name",name);
+
+    document.getElementById("myName").textContent = name;
+    document.getElementById("myAvatar").textContent =
+      name.charAt(0).toUpperCase();
+
+    closeProfile();
+
+    renderMessages();
+  }
+
+  function loadSettings(){
+    const theme = localStorage.getItem("discordia_theme");
+
+    if(theme === "light"){
+      document.documentElement.setAttribute("data-theme","light");
+    }
+
+    const name = localStorage.getItem("discordia_name");
+
+    if(name){
+      document.getElementById("myName").textContent = name;
+      document.getElementById("myAvatar").textContent =
+        name.charAt(0).toUpperCase();
+    }
+  }
+
+  loadSettings();
+  renderMessages();
+</script></body>
+    </html>
